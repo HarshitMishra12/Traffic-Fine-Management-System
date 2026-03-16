@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Traffic Fine Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Inter;
+        }
+
+        body{
+        background:url("https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b");
+        background-size:cover;
+        height:100vh;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        }
+
+        /* MAIN CONTAINER */
+
+        .container{
+        width:1200px;
+        height:720px;
+        background:rgba(255,255,255,0.08);
+        backdrop-filter:blur(25px);
+        border-radius:30px;
+        display:flex;
+        overflow:hidden;
+        box-shadow:0 30px 80px rgba(0,0,0,0.6);
+        }
+
+        /* SIDEBAR */
+
+        .sidebar{
+        width:230px;
+        background:rgba(255,255,255,0.1);
+        padding:30px;
+        }
+
+        .logo{
+        font-size:20px;
+        font-weight:600;
+        margin-bottom:40px;
+        }
+
+        .menu div{
+        padding:12px;
+        border-radius:12px;
+        margin-bottom:10px;
+        cursor:pointer;
+        }
+
+        .menu div:hover{
+        background:rgba(255,255,255,0.15);
+        }
+
+        /* MAIN */
+
+        .main{
+        flex:1;
+        padding:30px;
+        }
+
+        /* TOP */
+
+        .top{
+        display:flex;
+        justify-content:space-between;
+        margin-bottom:20px;
+        }
+
+        /* GRID */
+
+        .grid{
+        display:grid;
+        grid-template-columns:2fr 1fr;
+        gap:20px;
+        }
+
+        /* CARDS */
+
+        .card{
+        background:rgba(255,255,255,0.1);
+        padding:20px;
+        border-radius:18px;
+        }
+
+        /* STATS */
+
+        .stats{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:10px;
+        margin-top:20px;
+        }
+
+        .stat{
+        background:rgba(255,255,255,0.1);
+        padding:15px;
+        border-radius:14px;
+        text-align:center;
+        }
+
+        /* SMALL CARDS */
+
+        .smallgrid{
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:10px;
+        margin-top:20px;
+        }
+
+        .small{
+        background:rgba(255,255,255,0.1);
+        padding:10px;
+        border-radius:12px;
+        font-size:12px;
+        text-align:center;
+        }
+
+        /* TABLE */
+
+        table{
+        width:100%;
+        margin-top:20px;
+        border-collapse:collapse;
+        }
+
+        th,td{
+        padding:10px;
+        border-bottom:1px solid rgba(255,255,255,0.2);
+        }
+
+        th{
+        text-align:left;
+        color:#d1d5db;
+        }
+
+        canvas{
+        height:180px !important;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <div class="logo"> Traffic System</div>
+
+        <div class="menu">
+            <div>Dashboard</div>
+            <div>Vehicles</div>
+            <div>Challans</div>
+            <div>Offenses</div>
+            <div>Analytics</div>
+            <div>Settings</div>
+        </div>
+
+    </div>
+
+    <!-- MAIN -->
+
+    <div class="main">
+
+        <div class="top">
+
+            <h2>Welcome Officer </h2>
+
+            <button style="padding:10px 15px;border:none;border-radius:12px;background:#f97316;color:white">
+                Issue Challan
+            </button>
+
+        </div>
+
+        <div class="grid">
+
+            <!-- MAIN ANALYTICS -->
+
+            <div class="card">
+
+                <h3>Total Fine Collection</h3>
+
+                <canvas id="fineChart"></canvas>
+
+                <div class="stats">
+
+                    <div class="stat">
+                        Vehicles
+                        <h3 id="vehicleCount">0</h3>
+                    </div>
+
+                    <div class="stat">
+                        Challans
+                        <h3 id="challanCount">0</h3>
+                    </div>
+
+                    <div class="stat">
+                        Fine
+                        <h3 id="fineTotal">0</h3>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- DONUT -->
+
+            <div class="card">
+
+                <h3>Violation Types</h3>
+
+                <canvas id="offenseChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <!-- SMALL CARDS -->
+
+        <div class="smallgrid">
+
+            <div class="small">
+                Signal Jump
+                <h4>160</h4>
+            </div>
+
+            <div class="small">
+                Overspeed
+                <h4>120</h4>
+            </div>
+
+            <div class="small">
+                No Helmet
+                <h4>90</h4>
+            </div>
+
+            <div class="small">
+                Triple Riding
+                <h4>62</h4>
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+
+        <div class="card">
+
+            <h3 style="margin-bottom:10px">Recent Violations</h3>
+
+            <table>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Vehicle</th>
+                    <th>Offense</th>
+                    <th>Fine</th>
+                    <th>Status</th>
+                </tr>
+
+                <tbody id="recentTable"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- CHART SCRIPT -->
+
+<script>
+
+    new Chart(document.getElementById("fineChart"),{
+
+    type:'line',
+
+    data:{
+    labels:["Jan","Feb","Mar","Apr","May"],
+    datasets:[{
+    data:[12000,18000,16000,22000,28000],
+    borderColor:"#f97316",
+    backgroundColor:"rgba(249,115,22,0.2)",
+    tension:0.4
+    }]
+    },
+
+    options:{plugins:{legend:{display:false}}}
+
+    });
+
+    new Chart(document.getElementById("offenseChart"),{
+
+    type:'doughnut',
+
+    data:{
+    labels:["Signal Jump","Overspeed","No Helmet","Triple Riding"],
+    datasets:[{
+    data:[160,120,90,62],
+    backgroundColor:["#ef4444","#f97316","#22c55e","#38bdf8"]
+    }]
+    }
+
+    });
+
+</script>
+
+<!-- REALTIME DASHBOARD SCRIPT -->
+
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>
